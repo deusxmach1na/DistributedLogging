@@ -21,43 +21,49 @@ public class LoggingServerThread extends Thread {
 	//3.  output results to client socket
 	public void run() {
 		try {
-			PrintWriter serverToClient = new PrintWriter(clientSocket.getOutputStream(), true);
-			BufferedReader clientToServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+			DataOutputStream serverToClient = new DataOutputStream(clientSocket.getOutputStream());
+			ObjectInputStream clientToServer = new ObjectInputStream(clientSocket.getInputStream());
 			//get client input and send to LoggingServerProtocol
 			String inputFromClient;
 			String outputToClient;
 		    LoggingServerProtocol lsp = new LoggingServerProtocol();
 		    
-		    //is this needed?
-		    //outputToClient = lsp.processInput(null);
-		    //serverToClient.println(outputToClient);
-			while ((inputFromClient = clientToServer.readLine()) != null) {
+		    //loop and get input from client
+			while (true) {
+				inputFromClient = (String)clientToServer.readObject();
 			    System.out.println("server processing "+ inputFromClient);
+				outputToClient = lsp.processInput(inputFromClient);	
+				
 				//get the output from the LoggingServerProtocol
-				if(inputFromClient.equals("END")) {
+				if(outputToClient.equals("END")) {
 					clientSocket.close();
 					ls.closeServer();
 					break;
 				}
-				outputToClient = lsp.processInput(inputFromClient);
-			    serverToClient.println(outputToClient);
+			    serverToClient.writeBytes(outputToClient);
 			    serverToClient.flush();
-			    outputToClient = "";
-			}			
+			    serverToClient.writeBytes("EOF");
+			    serverToClient.flush();
+			}	
+		    System.out.println("closing client socket on server");
+			//close the client socket
+			this.clientSocket.close();
 
 		}
 		catch (IOException e) {
-			e.printStackTrace();
-			System.out.println("herenow");
+			//e.printStackTrace();
+		} 
+		catch (ClassNotFoundException e) {
+			//e.printStackTrace();
 		}
-	    System.out.println("closing client socket on server");
-		//close the client socket
-		try {
-			clientSocket.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		finally {
+			try {
+				System.out.println("closing client socket on server from finally");
+				this.clientSocket.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} 
 	}
 	
 	

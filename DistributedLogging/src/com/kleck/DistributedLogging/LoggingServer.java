@@ -17,8 +17,17 @@ public class LoggingServer {
 	public static void main (String args[]) {
 		int port = 6665;
 		int server = 1;
-		if(args.length != 2) {
+		
+		//change port and server if args are passed
+		if(args.length == 2) {
+			port = Integer.parseInt(args[0]);
+			server = Integer.parseInt(args[1]);
+		}
+		if(args.length < 2) {
 			System.out.println("Using default port " + port + ", and default server Number " + server +".");
+		}
+		else {
+			System.out.println("Using custom port " + port + ", and server Number " + server + ".");
 		}
 		new LoggingServer(port, server);
 	}
