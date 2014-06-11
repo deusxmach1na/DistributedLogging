@@ -14,6 +14,7 @@ public class LoggingClientThread extends Thread{
 	private String hostName;
 	private int portNumber;
 	private String command;
+	private String saveToFile;
 	
 	public LoggingClientThread(String hostName, int portNumber, String command) {
 		this.hostName = hostName;
@@ -33,19 +34,23 @@ public class LoggingClientThread extends Thread{
         	
         	//sent command to the server
     		if (fromUser != null) {
-    			System.out.println("Client: " + fromUser);
+    			System.out.println("Client Request: " + fromUser);
     			out.writeObject(fromUser);
     		}
     		
     		//prepare to print results to a file
-    		PrintWriter toFile = new PrintWriter("output_" + hostName + "_" + portNumber + ".out", "UTF-8");
+    		this.saveToFile = "output_" + hostName + "_" + portNumber + ".out";
+    		PrintWriter toFile = new PrintWriter(saveToFile, "UTF-8");
     		//get results from server
-    		while((fromServer = in.readLine()) != "EOF") {
-    			System.out.println("Server: " + fromServer);
+    		while((fromServer = in.readLine()) != null) {
+    			System.out.println("Server Response: " + fromServer);
     			toFile.println(fromServer);
     		}
+    		
+    		//tell server to close connection and clean up
+    		out.writeObject(fromServer);
     		toFile.close();
-        	System.out.println("closing socket on client side");
+        	//System.out.println("closing socket on client side");
         	socket.close();
         	
         	
@@ -55,6 +60,18 @@ public class LoggingClientThread extends Thread{
             System.out.println("Couldn't get I/O for the connection to " + hostName + " port " + portNumber);
         }
 	}
+	
+	//get the file that was created
+	public String getSaveToFile() {
+		return saveToFile;
+	}
+
+	//set where to save the file
+	public void setSaveToFile(String saveToFile) {
+		this.saveToFile = saveToFile;
+	}
+	
+	
 
 		
 }

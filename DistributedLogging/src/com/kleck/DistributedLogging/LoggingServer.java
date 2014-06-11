@@ -45,7 +45,7 @@ public class LoggingServer {
 		
 			//create a new thread when client connects
 			while(true) {
-				LoggingServerThread lst = new LoggingServerThread(serverSocket.accept(), this);
+				LoggingServerThread lst = new LoggingServerThread(serverSocket.accept(), this.serverNumber);
 				lst.start();
 			}
 		}	
@@ -58,15 +58,6 @@ public class LoggingServer {
 	//what server is this
 	public int getServerNumber() {
 		return this.serverNumber;
-	}
-	
-	//close server connection if client types END
-	public void closeServer() {
-		try {
-			this.serverSocket.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 

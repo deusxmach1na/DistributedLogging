@@ -6,12 +6,12 @@ import java.io.*;
 public class LoggingServerThread extends Thread {
 	//initialize socket and in and out buffers
 	private Socket clientSocket = null;
-	private LoggingServer ls = null;
+	private int serverNumber;
 	
-	public LoggingServerThread (Socket clientSocket, LoggingServer loggingServer) {
-		super("Thread For Server Number " + loggingServer.getServerNumber());
-		this.ls = loggingServer;
+	public LoggingServerThread (Socket clientSocket, int serverNumber) {
+		//System.out.println("Server Thread Accepted Connection");
 		this.clientSocket = clientSocket;
+		this.serverNumber = serverNumber;
 	}
 	
 	//1 thread of the server
@@ -24,48 +24,38 @@ public class LoggingServerThread extends Thread {
 			DataOutputStream serverToClient = new DataOutputStream(clientSocket.getOutputStream());
 			ObjectInputStream clientToServer = new ObjectInputStream(clientSocket.getInputStream());
 			//get client input and send to LoggingServerProtocol
-			String inputFromClient;
-			String outputToClient;
 		    LoggingServerProtocol lsp = new LoggingServerProtocol();
-		    
-		    //loop and get input from client
-			while (true) {
-				inputFromClient = (String)clientToServer.readObject();
-			    System.out.println("server processing "+ inputFromClient);
-				outputToClient = lsp.processInput(inputFromClient);	
-				
-				//get the output from the LoggingServerProtocol
-				if(outputToClient.equals("END")) {
-					clientSocket.close();
-					ls.closeServer();
-					break;
-				}
-			    serverToClient.writeBytes(outputToClient);
-			    serverToClient.flush();
-			    serverToClient.writeBytes("EOF");
-			    serverToClient.flush();
+			String input = (String) clientToServer.readObject();
+			System.out.println("server processing "+ input);
+			String output = "";
+			
+			//get output 
+			//could change this conditionally on input
+			if(input.equals("generateRandomTestLogs")) {
+				output = "Generated these files:\n" + lsp.generateRandomTestLogs(this.serverNumber);
+			}
+			else {
+				output = lsp.executeGrep(input);
 			}	
-		    System.out.println("closing client socket on server");
+			
+			//send output to client
+			serverToClient.writeBytes(output);
+			serverToClient.flush();
+
+		    //System.out.println("closing client socket on server");
 			//close the client socket
 			this.clientSocket.close();
 
 		}
 		catch (IOException e) {
-			//e.printStackTrace();
+			e.printStackTrace();
+			System.out.println("IOException");
 		} 
 		catch (ClassNotFoundException e) {
-			//e.printStackTrace();
-		}
-		finally {
-			try {
-				System.out.println("closing client socket on server from finally");
-				this.clientSocket.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			e.printStackTrace();
+			System.out.println("ClassNotFoundException");
 		} 
 	}
-	
 	
 	
 }
