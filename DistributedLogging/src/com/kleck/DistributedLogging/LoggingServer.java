@@ -48,8 +48,11 @@ public class LoggingServer {
 				lst.start();
 			}
 		}	
+		catch (BindException be) {
+			System.out.println("Logging Server has already been started on port number " + portNumber + ".");
+		}
 		catch (IOException e) {
-			System.out.println("Error listening on port " + portNumber);	
+			System.out.println("I/O Error listening on port number " + portNumber + ".");
 		}	 
 		
 	}
@@ -58,6 +61,5 @@ public class LoggingServer {
 	public int getServerNumber() {
 		return this.serverNumber;
 	}
-
 
 }

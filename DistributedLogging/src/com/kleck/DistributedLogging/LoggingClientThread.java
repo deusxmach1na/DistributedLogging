@@ -15,11 +15,13 @@ public class LoggingClientThread extends Thread{
 	private int portNumber;
 	private String command;
 	private String saveToFile;
+	private boolean isLogTest;
 	
-	public LoggingClientThread(String hostName, int portNumber, String command) {
+	public LoggingClientThread(String hostName, int portNumber, String command, boolean isLogTest) {
 		this.hostName = hostName;
 		this.portNumber = portNumber;
 		this.command = command;
+		this.isLogTest = isLogTest;
 	}
     
 	public void run() {
@@ -43,6 +45,8 @@ public class LoggingClientThread extends Thread{
     		PrintWriter toFile = new PrintWriter(saveToFile, "UTF-8");
     		//get results from server
     		while((fromServer = in.readLine()) != null) {
+    			if(!this.isLogTest)
+    				System.out.println("Server Reply: " + fromServer);
     			//System.out.println("Server Response: " + fromServer);
     			toFile.println(fromServer);
     		}

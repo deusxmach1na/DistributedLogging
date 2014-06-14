@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Properties;
 
 public class LoggingUnitTests {
+	
 	public static void main(String[] args) {
 		//get hosts from file using LoggingClient loadParams()
 		//read from host file for easier testing :)
@@ -22,10 +23,12 @@ public class LoggingUnitTests {
 		//have the user either generateLogs
 		if(args[0].equals("generateLogs")) {
 			startTestServers(hostPorts);
+			System.out.println("Please wait. Generating Log Files...");
 			//builds and starts a clientThread and issues command to generateLogs
 			LoggingClient.startClientThreads(hosts, "generateLogs", false);
 			System.out.println("Logs have been generated on the servers.\n  "
-					+ "Please move these to the client folder to run the unit test.");
+					+ "Please move these to the client folder to run the unit test.\n");
+			
 		}
 		//or run a grep test
 		else if(args[0].equals("runUnitTest")){
@@ -39,15 +42,21 @@ public class LoggingUnitTests {
 			knownKeys.add("_SOME_");
 			knownKeys.add("_FREQ_");
 			String command = "";
+			int testNum = 0;
 			
 			//lets user select which test to do
+			//as long as it's between 0 and 3
 			try {
-				command = "grep \"" + knownKeys.get(Integer.parseInt(args[1])) + "\" ";
+				testNum = Integer.parseInt(args[1]);
+				if(testNum >= knownKeys.size())
+					testNum = 0;
+				command = "grep \"" + knownKeys.get(testNum) + "\" ";
 			}
 			catch(NumberFormatException nfe) {
 				command = "grep \"" + knownKeys.get(0) + "\" ";
 			}
-			System.out.println(command);
+			//System.out.println(command);
+			System.out.println("Please wait for the grep to complete...");
 			LoggingClient.startClientThreads(hosts, command, true);		
 			
 			
@@ -66,8 +75,16 @@ public class LoggingUnitTests {
 				greppedFilenames.add("serverResponse_" + hosts[i].split(",")[0] + "_" + hosts[i].split(",")[1] + ".out");
 			}
 			
-			//print the results
+			//print the final results!!!!
 			System.out.println(parseFilesAndCompare(logFilenames, greppedFilenames, command, hosts));	
+		}
+		else {
+			System.out.println("Please use generateLogs OR runUnitTest X to start the unit test.\n"
+					+ "X can be a number between 0 and 3\n"
+					+ "0 is an ultra-rare pattern        (p=.0001)\n"
+					+ "1 is a rare pattern               (p=.003)\n"
+					+ "2 is a somewhat frequent pattern  (p=.03)\n"
+					+ "3 is a common pattern             (p=.3)");
 		}
 	}
 	
@@ -84,12 +101,14 @@ public class LoggingUnitTests {
 	private static String parseFilesAndCompare(ArrayList<String> logFilenames, ArrayList<String> greppedFilenames, String command, String[] hosts) {
 		boolean isMatch = true;
 		String result = "";
+		String tempCommand = command;
 		
         for(int i=0;i<hosts.length;i++) {
             ArrayList<String> localGrepResults = new ArrayList<String>();
             ArrayList<String> remoteGrepResults = new ArrayList<String>();
+            
 			//do a local grep on logFilenames and compare lineNumbers
-        	command = command + logFilenames.get(i);
+        	command = tempCommand + logFilenames.get(i);
         	//System.out.println(command);
 			try {
 				//do local grep
@@ -106,12 +125,12 @@ public class LoggingUnitTests {
 		        //get all the line numbers for the same server (the remote page)
 		        BufferedReader br = new BufferedReader(new FileReader(greppedFilenames.get(i)));
 		        String line;
-		        System.out.println(greppedFilenames.get(i));
+		        //System.out.println(greppedFilenames.get(i));
 		        while ((line = br.readLine()) != null) {
 		        	remoteGrepResults.add(line.split("#LINE_NUMBER#")[1]);
 		        }
 		        br.close();
-		        
+		        //System.out.println("grep size" + localGrepResults.size());
 		        //sort results
 		        Collections.sort(remoteGrepResults);
 		        Collections.sort(localGrepResults);
@@ -120,17 +139,17 @@ public class LoggingUnitTests {
 		        for(int j=0;j<Math.min(remoteGrepResults.size(), localGrepResults.size());j++) {
 		        	if(!remoteGrepResults.get(j).equals(localGrepResults.get(j))) {
 		        		isMatch = false;		
-		        		result = "FAIL**Failed Matching Elements**FAIL";
+		        		result = "FAIL**Test Failed Matching Elements From The Remote grep And Local grep**FAIL";
 		        	}
 		        }
 		        
-		        /*
+		        
 		        //fail if they are not the same size
 		        if(remoteGrepResults.size()!=localGrepResults.size()) {
 		        	isMatch = false;		
-        			result = "FAIL**Failed On Size of Arrays**FAIL" + remoteGrepResults.size() + "\n" + localGrepResults.size();
+        			result = "FAIL**Results inconclusive.  Number of Results Do Not Match**FAIL";
 		        }
-		          */
+		          
 		        if(!isMatch)
 		        	break;
 		        
@@ -163,4 +182,5 @@ class TestingThread extends Thread {
 	public void run() {
 		new LoggingServer(this.port, this.serverNumber);
 	}
+	
 }

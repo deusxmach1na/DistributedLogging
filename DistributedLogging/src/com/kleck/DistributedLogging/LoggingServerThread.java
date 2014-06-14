@@ -26,7 +26,7 @@ public class LoggingServerThread extends Thread {
 			//get client input and send to LoggingServerProtocol
 		    LoggingServerProtocol lsp = new LoggingServerProtocol();
 			String input = (String) clientToServer.readObject();
-			System.out.println("server processing "+ input);
+			//System.out.println("server processing "+ input);
 			String output = "";
 			
 			//get output 
@@ -35,7 +35,7 @@ public class LoggingServerThread extends Thread {
 				output = "Generated these files:\n" + lsp.generateLogs(this.serverNumber);
 			}
 			else {
-				output = lsp.executeGrep(input);
+				output = lsp.executeGrep(input, this.serverNumber);
 			}	
 			
 			//send output to client

@@ -46,7 +46,7 @@ public class LoggingClient {
 		    		if(isLogTest) 
 		    			command = tempCommand + "server_" + i + ".log";
 		    		//System.out.println("Spawning Host " + host[0] + " And Port " + host[1]);
-		            lct.add(new LoggingClientThread(host[0], Integer.parseInt(host[1]), command));
+		            lct.add(new LoggingClientThread(host[0], Integer.parseInt(host[1]), command, isLogTest));
 		            lct.get(i).start();	
 		            //System.out.println("Started Thread " + i);
 		    	}
@@ -83,7 +83,7 @@ public class LoggingClient {
 	        is.close();
 	    }
 	    catch (Exception e) { 
-	    	System.out.println("Did not find hostname file.");
+	    	System.out.println("Did not find hostname file. Ensure it is in the client folder.");
 	    	e.printStackTrace();
 	    }
 	    

@@ -7,7 +7,7 @@ import java.util.Random;
 public class LoggingServerProtocol {
 	
 	//execute grep command
-	public String executeGrep(String input) {
+	public String executeGrep(String input, int serverNumber) {
 		String results = "";
 		String command = input;
 		
@@ -21,10 +21,10 @@ public class LoggingServerProtocol {
             String s = "";
             // read the output from the command
             while ((s = stdInput.readLine()) != null) {
-                results = results + s + "\n";
+                results = results + "#_SERVERNUMBER_#" + serverNumber + s + "\n";
             }
             while ((s = stdError.readLine()) != null) {
-                results = results + s + "\n";
+                results = results + "#_SERVERNUMBER_#" + serverNumber + s + "\n";
             }
 			
         }
@@ -54,14 +54,14 @@ public class LoggingServerProtocol {
 		
 		filename = "server_" + serverNumber + ".log";
 		Random random = new Random();
-		int linesToGenerate = 100000;
+		int linesToGenerate = 1000000;
 		int j = 0;			
 		
 		//open file writer and generate random lines
 		PrintWriter toFile;
 		try {
 			toFile = new PrintWriter(filename, "UTF-8");
-			toFile.println("#LOG_FILE_FOR_SERVER_ON_PORT_" + serverNumber + "#");
+			toFile.println("#LOG_FILE_FOR_SERVER_NUMBER_" + serverNumber + "#");
 			
 			//generate random lines
 			while(j < linesToGenerate) {
@@ -70,19 +70,19 @@ public class LoggingServerProtocol {
 				
 				//ULTRA RARE
 				if(rand == 0) 
-					keyValuePair = "{" + knownKeys.get(0) + ":" + knownKeys.get(0) + "}";
+					keyValuePair = "#_SERVERNUMBER_#" + serverNumber + "{" + knownKeys.get(0) + ":" + knownKeys.get(0) + "}";
 				//RARE
 				else if(rand < 30) 
-					keyValuePair = "{" + knownKeys.get(1) + ":" + knownKeys.get(1) + "}";
+					keyValuePair = "#_SERVERNUMBER_#" + serverNumber + "{" + knownKeys.get(1) + ":" + knownKeys.get(1) + "}";
 				//SOME
 				else if(rand < 300)
-					keyValuePair = "{" + knownKeys.get(2) + ":" + knownKeys.get(2) + "}";
+					keyValuePair = "#_SERVERNUMBER_#" + serverNumber + "{" + knownKeys.get(2) + ":" + knownKeys.get(2) + "}";
 				//FREQ
 				else if(rand < 3000)
-					keyValuePair = "{" + knownKeys.get(3) + ":" + knownKeys.get(3) + "}";
+					keyValuePair = "#_SERVERNUMBER_#" + serverNumber + "{" + knownKeys.get(3) + ":" + knownKeys.get(3) + "}";
 				//RAND
 				else 
-					keyValuePair = generateRandomLine();
+					keyValuePair = "#_SERVERNUMBER_#" + serverNumber + generateRandomLine();
 				toFile.println(keyValuePair + "#LINE_NUMBER#" + j);
 				j++;
 			}
