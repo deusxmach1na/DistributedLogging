@@ -34,16 +34,16 @@ public class LoggingClientThread extends Thread{
         	
         	//sent command to the server
     		if (fromUser != null) {
-    			System.out.println("Client Request: " + fromUser);
+    			//System.out.println("Client Request: " + fromUser);
     			out.writeObject(fromUser);
     		}
     		
     		//prepare to print results to a file
-    		this.saveToFile = "output_" + hostName + "_" + portNumber + ".out";
+    		this.saveToFile = "serverResponse_" + hostName + "_" + portNumber + ".out";
     		PrintWriter toFile = new PrintWriter(saveToFile, "UTF-8");
     		//get results from server
     		while((fromServer = in.readLine()) != null) {
-    			System.out.println("Server Response: " + fromServer);
+    			//System.out.println("Server Response: " + fromServer);
     			toFile.println(fromServer);
     		}
     		
@@ -57,7 +57,9 @@ public class LoggingClientThread extends Thread{
         } catch (UnknownHostException e) {
             System.out.println("Don't know about host " + hostName);
         } catch (IOException e) {
-            System.out.println("Couldn't get I/O for the connection to " + hostName + " port " + portNumber);
+            System.out.println("I/O Connection to " + hostName + " on port " + portNumber + " has failed.");
+        } catch (Exception e) {
+            System.out.println("General exception connecting to " + hostName + " port " + portNumber);
         }
 	}
 	

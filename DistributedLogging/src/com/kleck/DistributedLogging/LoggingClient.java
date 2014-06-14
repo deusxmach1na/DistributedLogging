@@ -7,7 +7,6 @@ import java.util.Properties;
 
 public class LoggingClient {
     public static void main(String[] args) throws IOException {
-        ArrayList<LoggingClientThread> lct;
         
         //read hostname file
         Properties props = loadParams();
@@ -18,40 +17,56 @@ public class LoggingClient {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         
         while((command = br.readLine()) != null) {
+        	//break out of here if the user types exit
         	if(command.trim().equals("exit"))	
         		break;
         	
-        	//add threads to array
-        	lct = new ArrayList<LoggingClientThread>();
-	        if(!command.trim().equals("")) {
-	        	
-	        	//start 1 thread per host
-		        for(int i=0;i<hosts.length;i++) {
-		        	String[] host = hosts[i].split(",");
-		        	if(!host[0].equals("") && !host[1].equals("")) {
-		        		//System.out.println("Spawning Host " + host[0] + " And Port " + host[1]);
-		                lct.add(new LoggingClientThread(host[0], Integer.parseInt(host[1]), command));
-		                lct.get(i).start();	
-		                //System.out.println("Started Thread " + i);
-		        	}
-		        }	        
-		        
-		        //wait for all threads to return
-		        //does this need to adjust in case of server failure?
-		        for(int i=0;i<lct.size();i++){
-		        	try {
-						lct.get(i).join();
-						//System.out.println("joining thread " + i);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-		        }
-	        }  
+        	//otherwise start client threads
+        	//and pass the command
+        	startClientThreads(hosts, command, false);  
         }    
-        System.out.println("fin");
-        
-
+        //System.out.println("fin");    
     }
+
+    //starts 1 client thread per host 
+    //passes the command to each client thread
+    //this method used in Testing
+	public static void startClientThreads(String[] hosts, String command, boolean isLogTest) {
+		//put ClientThreads in an arrayList for easier management
+		ArrayList<LoggingClientThread> lct = new ArrayList<LoggingClientThread>();
+		String tempCommand = command;
+		//start each client thread and wait for
+		//them to finish processing the command
+		if(!command.trim().equals("")) {	
+			//start 1 thread per host
+		    for(int i=0;i<hosts.length;i++) {
+		    	String[] host = hosts[i].split(",");
+		    	if(!host[0].equals("") && !host[1].equals("")) {
+		    		//add the server log file name if it is the unit test
+		    		if(isLogTest) 
+		    			command = tempCommand + "server_" + i + ".log";
+		    		//System.out.println("Spawning Host " + host[0] + " And Port " + host[1]);
+		            lct.add(new LoggingClientThread(host[0], Integer.parseInt(host[1]), command));
+		            lct.get(i).start();	
+		            //System.out.println("Started Thread " + i);
+		    	}
+		    }	        
+		    
+		    //wait for all threads to return
+		    //does this need to handle server failure?
+		    //TESTED...better method?
+		    for(int i=0;i<lct.size();i++){
+		    	try {
+					lct.get(i).join();
+					//System.out.println("joining thread " + i);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+		    }
+		}
+
+	
+	}
     
 	//open property file to get the hostName and portNumber
 	public static Properties loadParams() {

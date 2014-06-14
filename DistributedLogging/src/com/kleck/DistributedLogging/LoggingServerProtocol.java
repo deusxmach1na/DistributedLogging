@@ -1,6 +1,7 @@
 package com.kleck.DistributedLogging;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class LoggingServerProtocol {
@@ -34,87 +35,79 @@ public class LoggingServerProtocol {
 	}
 	
 	
-	//execute grep command
-	public String generateRandomTestLogs(int serverNumber) {
-		//need to generate 2 logs per machine
-		//1 with the following
+	//generate random logs for unit testing
+	//TESTING
+	public String generateLogs(int serverNumber) {
+		//need to generate 1 log per machine
+		//with the following
 		//1. rare keys
 		//2. somewhat frequent keys
 		//3. frequent keys
-		//1 that is completely random
-		String[] knownKeys = new String[4];
-		knownKeys[0] = "RARE";
-		knownKeys[1] = "SOME";
-		knownKeys[2] = "FREQ";
-		knownKeys[3] = "RAND";
-		String filenames[] = new String[2];
+		//4. bonus ultra rare
+		//rest random
+		ArrayList<String> knownKeys = new ArrayList<String>();
+		knownKeys.add("_ULTR_");
+		knownKeys.add("_RARE_");
+		knownKeys.add("_SOME_");
+		knownKeys.add("_FREQ_");
+		String filename;
 		
-		for(int i=0;i<2;i++) {
-			//filename will be something like
-			//server_1_KNOWN.log or server_2_RANDOM.log
+		filename = "server_" + serverNumber + ".log";
+		Random random = new Random();
+		int linesToGenerate = 100000;
+		int j = 0;			
+		
+		//open file writer and generate random lines
+		PrintWriter toFile;
+		try {
+			toFile = new PrintWriter(filename, "UTF-8");
+			toFile.println("#LOG_FILE_FOR_SERVER_ON_PORT_" + serverNumber + "#");
 			
-			if(i==0)
-				filenames[i] = "server_" + serverNumber + "_KNOWN.log";
-			if(i==1)
-				filenames[i] = "server_" + serverNumber + "_RANDOM.log";
-			Random random = new Random();
-			int linesToGenerate = 100000;
-			int j = 0;			
-			
-			//open file writer and generate random lines
-			PrintWriter toFile;
-			try {
-				toFile = new PrintWriter(filenames[i], "UTF-8");
-				//generate random lines
-				while(j < linesToGenerate) {
-					int rand = random.nextInt(10000); //0-9999
-					String keyValuePair = "";
-					
-					//RARE
-					if(rand < 10) 
-						keyValuePair = "{" + knownKeys[0] + ":" + knownKeys[0] + "}";
-					//SOME
-					else if(rand < 100)
-						keyValuePair = "{" + knownKeys[1] + ":" + knownKeys[1] + "}";
-					//FREQ
-					else if(rand < 1000)
-						keyValuePair = "{" + knownKeys[2] + ":" + knownKeys[2] + "}";
-					//RAND
-					else 
-						keyValuePair = generateRandomLine();
-					toFile.println(keyValuePair);
-					j++;
-				}
-				toFile.close();			
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
+			//generate random lines
+			while(j < linesToGenerate) {
+				int rand = random.nextInt(10000); //0-9999
+				String keyValuePair = "";
+				
+				//ULTRA RARE
+				if(rand == 0) 
+					keyValuePair = "{" + knownKeys.get(0) + ":" + knownKeys.get(0) + "}";
+				//RARE
+				else if(rand < 30) 
+					keyValuePair = "{" + knownKeys.get(1) + ":" + knownKeys.get(1) + "}";
+				//SOME
+				else if(rand < 300)
+					keyValuePair = "{" + knownKeys.get(2) + ":" + knownKeys.get(2) + "}";
+				//FREQ
+				else if(rand < 3000)
+					keyValuePair = "{" + knownKeys.get(3) + ":" + knownKeys.get(3) + "}";
+				//RAND
+				else 
+					keyValuePair = generateRandomLine();
+				toFile.println(keyValuePair + "#LINE_NUMBER#" + j);
+				j++;
 			}
-					
+			toFile.close();			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
 		}
-		return filenames[0] + "\n" + filenames[1];
+		return filename;
 	}
 
 	
 	//used to generate a random line in the logs
+	//TESTING
 	private String generateRandomLine() {
-		String alpha = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		String alpha = "       0123456789AAAABBCCCDDDEEEEEEEFFFGGGHHHIJKLLLMMMNNNOOOOPPQRRRRRSSSSSTTTTTUUUVWXYZ";
 		Random random = new Random();
-		String time = String.valueOf(System.nanoTime());
-		String value = "";
-		String results = "";
-		int rand;
+		String value = "{" + String.valueOf(System.nanoTime()) + ":";
 		
 		//make the value 25 characters long
-		for(int i=0;i<25;i++) {
-			rand = random.nextInt(alpha.length());
-			value += alpha.charAt(rand);
+		for(int i=0;i<50;i++) {
+			value += alpha.charAt(random.nextInt(alpha.length()));
 		}
-		
-		results = "{" + time + ":" + value + "}";
-		
-		return results;
+		return value + "}";
 	}
 	
 	

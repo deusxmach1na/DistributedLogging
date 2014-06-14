@@ -38,7 +38,6 @@ public class LoggingServer {
 		this.portNumber = portNumber;
 		this.serverNumber = serverNumber;
 		
-		
 		try {
 			//initialize server socket
 			this.serverSocket = new ServerSocket(this.portNumber);

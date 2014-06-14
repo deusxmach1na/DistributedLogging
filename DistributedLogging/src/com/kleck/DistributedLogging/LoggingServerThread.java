@@ -31,8 +31,8 @@ public class LoggingServerThread extends Thread {
 			
 			//get output 
 			//could change this conditionally on input
-			if(input.equals("generateRandomTestLogs")) {
-				output = "Generated these files:\n" + lsp.generateRandomTestLogs(this.serverNumber);
+			if(input.equals("generateLogs")) {
+				output = "Generated these files:\n" + lsp.generateLogs(this.serverNumber);
 			}
 			else {
 				output = lsp.executeGrep(input);
