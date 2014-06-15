@@ -44,7 +44,7 @@ public class LoggingClient {
 		    	if(!host[0].equals("") && !host[1].equals("")) {
 		    		//add the server log file name if it is the unit test
 		    		if(isLogTest) 
-		    			command = tempCommand + "server_" + i + ".log";
+		    			command = tempCommand + "machine." + i + ".log";
 		    		//System.out.println("Spawning Host " + host[0] + " And Port " + host[1]);
 		            lct.add(new LoggingClientThread(host[0], Integer.parseInt(host[1]), command, isLogTest));
 		            lct.get(i).start();	

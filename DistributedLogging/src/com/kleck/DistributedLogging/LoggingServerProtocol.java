@@ -52,9 +52,9 @@ public class LoggingServerProtocol {
 		knownKeys.add("_FREQ_");
 		String filename;
 		
-		filename = "server_" + serverNumber + ".log";
+		filename = "machine." + serverNumber + ".log";
 		Random random = new Random();
-		int linesToGenerate = 1000000;
+		int linesToGenerate = 100000;
 		int j = 0;			
 		
 		//open file writer and generate random lines

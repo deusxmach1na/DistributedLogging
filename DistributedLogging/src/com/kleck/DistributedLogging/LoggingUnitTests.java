@@ -65,7 +65,7 @@ public class LoggingUnitTests {
 			//after being generated on the server side
 			ArrayList<String> logFilenames = new ArrayList<String>();
 			for(int i=0;i<hostPorts.size();i++) {
-				logFilenames.add("server_" + i + ".log");
+				logFilenames.add("machine." + i + ".log");
 			}
 			
 			//get filenames for server output to compare
