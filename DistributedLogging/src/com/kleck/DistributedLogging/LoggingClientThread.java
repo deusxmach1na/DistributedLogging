@@ -34,7 +34,7 @@ public class LoggingClientThread extends Thread{
         	String fromServer = "";
         	String fromUser = this.command;
         	
-        	//sent command to the server
+        	//send command to the server
     		if (fromUser != null) {
     			//System.out.println("Client Request: " + fromUser);
     			out.writeObject(fromUser);
@@ -46,9 +46,10 @@ public class LoggingClientThread extends Thread{
     		//get results from server
     		while((fromServer = in.readLine()) != null) {
     			if(!this.isLogTest)
-    				System.out.println("Server Reply: " + fromServer);
+    				System.out.println(fromServer);
     			//System.out.println("Server Response: " + fromServer);
-    			toFile.println(fromServer);
+    			if(this.isLogTest)
+    				toFile.println(fromServer);
     		}
     		
     		//tell server to close connection and clean up
@@ -56,12 +57,15 @@ public class LoggingClientThread extends Thread{
     		toFile.close();
         	//System.out.println("closing socket on client side");
         	socket.close();
+        	out.close();
+        	in.close();
         	
         	
         } catch (UnknownHostException e) {
             System.out.println("Don't know about host " + hostName);
         } catch (IOException e) {
-            System.out.println("I/O Connection to " + hostName + " on port " + portNumber + " has failed.");
+            System.out.println("I/O Connection to " + hostName + " on port " + portNumber + " has failed.\n"
+            		+ "Ensure a server is running on each port listed in servers.prop");
         } catch (Exception e) {
             System.out.println("General exception connecting to " + hostName + " port " + portNumber);
         }

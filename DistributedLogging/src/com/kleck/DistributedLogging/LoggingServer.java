@@ -11,7 +11,9 @@ public class LoggingServer {
 	private int portNumber;
 	private int serverNumber;
 	private ServerSocket serverSocket;
-	
+	private boolean runFlag;
+
+
 	//main method
 	//get args and spin up the Logging Server
 	public static void main (String args[]) {
@@ -37,13 +39,14 @@ public class LoggingServer {
 	public LoggingServer(int portNumber, int serverNumber) {
 		this.portNumber = portNumber;
 		this.serverNumber = serverNumber;
+		this.runFlag = true;
 		
 		try {
 			//initialize server socket
 			this.serverSocket = new ServerSocket(this.portNumber);
 		
 			//create a new thread when client connects
-			while(true) {
+			while(true && this.runFlag) {
 				LoggingServerThread lst = new LoggingServerThread(serverSocket.accept(), this.serverNumber);
 				lst.start();
 			}
@@ -61,5 +64,15 @@ public class LoggingServer {
 	public int getServerNumber() {
 		return this.serverNumber;
 	}
+	
+	//get set runFlag
+	public boolean isRunFlag() {
+		return runFlag;
+	}
+
+	public void setRunFlag(boolean runFlag) {
+		this.runFlag = runFlag;
+	}
+	
 
 }

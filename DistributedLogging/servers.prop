@@ -3,4 +3,4 @@
 #example usage:
 #servers=localhost,6665;127.0.0.1,7775
 
-servers=localhost,6665;localhost,6667;localhost,6669
+servers=localhost,6665;localhost,6667;localhost,6669;

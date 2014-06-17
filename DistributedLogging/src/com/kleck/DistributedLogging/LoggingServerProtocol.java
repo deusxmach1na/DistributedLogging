@@ -1,3 +1,8 @@
+
+
+//////////////////////////////////////////
+///THIS CLASS IS NOT USED FOR SIMPLICITY
+//////////////////////////////////////////
 package com.kleck.DistributedLogging;
 
 import java.io.*;
@@ -7,7 +12,7 @@ import java.util.Random;
 public class LoggingServerProtocol {
 	
 	//execute grep command
-	public String executeGrep(String input, int serverNumber) {
+	public String executeGrep(String input, LoggingServerThread ls) {
 		String results = "";
 		String command = input;
 		
@@ -21,10 +26,10 @@ public class LoggingServerProtocol {
             String s = "";
             // read the output from the command
             while ((s = stdInput.readLine()) != null) {
-                results = results + "#_SERVERNUMBER_#" + serverNumber + s + "\n";
+                results = results + "Server #" + ls.getServerNumber() + ":" + s + "\n";
             }
             while ((s = stdError.readLine()) != null) {
-                results = results + "#_SERVERNUMBER_#" + serverNumber + s + "\n";
+                results = results + "Server #" + ls.getServerNumber() + ":" + s + "\n";
             }
 			
         }
@@ -37,7 +42,7 @@ public class LoggingServerProtocol {
 	
 	//generate random logs for unit testing
 	//TESTING
-	public String generateLogs(int serverNumber) {
+	public String generateLogs(LoggingServerThread ls) {
 		//need to generate 1 log per machine
 		//with the following
 		//1. rare keys
@@ -52,7 +57,7 @@ public class LoggingServerProtocol {
 		knownKeys.add("_FREQ_");
 		String filename;
 		
-		filename = "machine." + serverNumber + ".log";
+		filename = "machine." + ls.getServerNumber() + ".log";
 		Random random = new Random();
 		int linesToGenerate = 1100000;
 		int j = 0;			
@@ -61,7 +66,7 @@ public class LoggingServerProtocol {
 		PrintWriter toFile;
 		try {
 			toFile = new PrintWriter(filename, "UTF-8");
-			toFile.println("#LOG_FILE_FOR_SERVER_NUMBER_" + serverNumber + "#");
+			toFile.println("#LOG_FILE_FOR_SERVER_NUMBER_" + ls.getServerNumber() + "#");
 			
 			//generate random lines
 			while(j < linesToGenerate) {
@@ -70,19 +75,19 @@ public class LoggingServerProtocol {
 				
 				//ULTRA RARE
 				if(rand == 0) 
-					keyValuePair = "#_SERVERNUMBER_#" + serverNumber + "{" + knownKeys.get(0) + ":" + knownKeys.get(0) + "}";
+					keyValuePair = "#_SERVERNUMBER_#" + ls.getServerNumber() + "{" + knownKeys.get(0) + ":" + knownKeys.get(0) + "}";
 				//RARE
 				else if(rand < 30) 
-					keyValuePair = "#_SERVERNUMBER_#" + serverNumber + "{" + knownKeys.get(1) + ":" + knownKeys.get(1) + "}";
+					keyValuePair = "#_SERVERNUMBER_#" + ls.getServerNumber() + "{" + knownKeys.get(1) + ":" + knownKeys.get(1) + "}";
 				//SOME
 				else if(rand < 300)
-					keyValuePair = "#_SERVERNUMBER_#" + serverNumber + "{" + knownKeys.get(2) + ":" + knownKeys.get(2) + "}";
+					keyValuePair = "#_SERVERNUMBER_#" + ls.getServerNumber() + "{" + knownKeys.get(2) + ":" + knownKeys.get(2) + "}";
 				//FREQ
 				else if(rand < 3000)
-					keyValuePair = "#_SERVERNUMBER_#" + serverNumber + "{" + knownKeys.get(3) + ":" + knownKeys.get(3) + "}";
+					keyValuePair = "#_SERVERNUMBER_#" + ls.getServerNumber() + "{" + knownKeys.get(3) + ":" + knownKeys.get(3) + "}";
 				//RAND
 				else 
-					keyValuePair = "#_SERVERNUMBER_#" + serverNumber + generateRandomLine();
+					keyValuePair = "#_SERVERNUMBER_#" + ls.getServerNumber() + generateRandomLine();
 				toFile.println(keyValuePair + "#LINE_NUMBER#" + j);
 				j++;
 			}

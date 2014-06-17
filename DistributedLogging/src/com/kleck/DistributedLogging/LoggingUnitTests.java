@@ -16,24 +16,40 @@ public class LoggingUnitTests {
 		Properties props = LoggingClient.loadParams();
 		String[] hosts = props.getProperty("servers").split(";");
 		ArrayList<Integer> hostPorts = new ArrayList<Integer>();
+		ArrayList<String> passedArgs = new ArrayList<String>();
+		
+		for(int i=0;i<args.length;i++) {
+			passedArgs.add(args[i]);
+		}
+		
+		//add blank arguments in case the user didn't send enough args
+		for(int i=0;i<3;i++) {
+			if(passedArgs.size() <= i) {
+				passedArgs.add("");
+			}
+		}
+		
+		//get host ports from the host filename
 		for(int i=0;i<hosts.length;i++) {
 			hostPorts.add(new Integer(hosts[i].split(",")[1]));
 		}
 		
 		//have the user either generateLogs
-		if(args[0].equals("generateLogs")) {
-			startTestServers(hostPorts);
+		if(passedArgs.get(0).equals("generateLogs")) {
+			//are the test servers all localhost?
+			if(passedArgs.get(2).equals("true"))
+				startTestServers(hostPorts);
 			System.out.println("Please wait. Generating Log Files...");
 			//builds and starts a clientThread and issues command to generateLogs
-			LoggingClient.startClientThreads(hosts, "generateLogs", false);
+			LoggingClient.startClientThreads(hosts, "generateLogs " + passedArgs.get(1), false);
 			System.out.println("Logs have been generated on the servers.\n  "
 					+ "Please move these to the client folder to run the unit test.\n");
-			
 		}
 		//or run a grep test
-		else if(args[0].equals("runUnitTest")){
-			//start some servers
-			startTestServers(hostPorts);
+		else if(passedArgs.get(0).equals("runUnitTest")) {
+			//start some servers if they are all localhost
+			if(passedArgs.get(2).equals("true"))
+				startTestServers(hostPorts);
 			
 			//build grep command
 			ArrayList<String> knownKeys = new ArrayList<String>();
@@ -47,13 +63,15 @@ public class LoggingUnitTests {
 			//lets user select which test to do
 			//as long as it's between 0 and 3
 			try {
-				testNum = Integer.parseInt(args[1]);
+				testNum = Integer.parseInt(passedArgs.get(1));
 				if(testNum >= knownKeys.size())
 					testNum = 0;
 				command = "grep \"" + knownKeys.get(testNum) + "\" ";
+				System.out.println("Searching for pattern: " + knownKeys.get(testNum));
 			}
 			catch(NumberFormatException nfe) {
 				command = "grep \"" + knownKeys.get(0) + "\" ";
+				System.out.println("Searching for pattern: " + knownKeys.get(0));
 			}
 			//System.out.println(command);
 			System.out.println("Please wait for the grep to complete...");
@@ -82,22 +100,34 @@ public class LoggingUnitTests {
 			System.out.println(parseFilesAndCompare(logFilenames, greppedFilenames, command, hosts));	
 		}
 		else {
-			System.out.println("Please use generateLogs OR runUnitTest X to start the unit test.\n"
-					+ "X can be a number between 0 and 3\n"
-					+ "0 is an ultra-rare pattern        (p=.0001)\n"
-					+ "1 is a rare pattern               (p=.003)\n"
+			System.out.println("Example use:\n"
+					+ "java -cp DistributedLogging.jar com.kleck.DistributedLogging.LoggingUnitTests generateLogs X\n"
+			        + "X is an optional integer between 0 and 5\n"
+					+ "0 ~1 MB log file\n"
+					+ "1 ~10 MB log file\n"
+					+ "2 ~50 MB log file\n"
+					+ "3 ~100 MB log file DEFAULT\n"
+					+ "4 ~500 MB log file\n"
+					+ "5 ~1000 MB log file\n"
+					+ "java -cp DistributedLogging.jar com.kleck.DistributedLogging.LoggingUnitTests runUnitTest X\n"
+			        + "X is an optional integer between 0 and 3\n"
+					+ "0 is an ultra rare pattern        (p=.0001) DEFAULT\n"
+					+ "1 is a rare pattern  			 (p=.003)\n"
 					+ "2 is a somewhat frequent pattern  (p=.03)\n"
-					+ "3 is a common pattern             (p=.3)");
+					+ "3 is a frequent pattern           (p=.3)");
 		}
 	}
 	
 	//start some servers from hostfile
-	private static void startTestServers(ArrayList<Integer> hostPorts) {
+	private static ArrayList<LoggingServer> startTestServers(ArrayList<Integer> hostPorts) {
 		//start a server in a new thread for each hostPortNumber
+		ArrayList<LoggingServer> servers = new ArrayList<LoggingServer>();
 		for(int i=0;i<hostPorts.size();i++) {
 			TestingThread tt = new TestingThread(hostPorts.get(i), i);
 			tt.start();
-		}	
+			servers.add(tt.getLoggingServer());
+		}
+		return servers;	
 	}
 	
 	//do a local grep
@@ -146,7 +176,6 @@ public class LoggingUnitTests {
 		        	}
 		        }
 		        
-		        
 		        //fail if they are not the same size
 		        if(remoteGrepResults.size()!=localGrepResults.size()) {
 		        	isMatch = false;		
@@ -176,6 +205,7 @@ public class LoggingUnitTests {
 class TestingThread extends Thread {
 	int port;
 	int serverNumber;
+	LoggingServer loggingServer;
 	
 	public TestingThread (int port, int serverNumber) {
 		this.port = port;
@@ -183,7 +213,11 @@ class TestingThread extends Thread {
 	}
 	
 	public void run() {
-		new LoggingServer(this.port, this.serverNumber);
+		this.loggingServer = new LoggingServer(this.port, this.serverNumber);
+	}
+	
+	public LoggingServer getLoggingServer() {
+		return this.loggingServer;
 	}
 	
 }

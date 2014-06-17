@@ -24,7 +24,7 @@ public class LoggingClient {
         	//otherwise start client threads
         	//and pass the command
         	startClientThreads(hosts, command, false);  
-        }    
+        }  
         //System.out.println("fin");    
     }
 
@@ -75,7 +75,7 @@ public class LoggingClient {
 	    
 	    //load file
 	    try {
-	        File f = new File("servers.prop");
+	        File f = new File("./servers.prop");
 	        is = new FileInputStream(f);
 	 
 	        // Try loading properties from the file (if found)
@@ -83,7 +83,7 @@ public class LoggingClient {
 	        is.close();
 	    }
 	    catch (Exception e) { 
-	    	System.out.println("Did not find hostname file. Ensure it is in the client folder.");
+	    	System.out.println("Did not find hostname file. Ensure it is in the same folder as the jar.");
 	    	e.printStackTrace();
 	    }
 	    
