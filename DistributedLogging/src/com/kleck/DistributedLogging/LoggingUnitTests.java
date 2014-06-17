@@ -57,7 +57,10 @@ public class LoggingUnitTests {
 			}
 			//System.out.println(command);
 			System.out.println("Please wait for the grep to complete...");
-			LoggingClient.startClientThreads(hosts, command, true);		
+			long startTime = System.currentTimeMillis();
+			LoggingClient.startClientThreads(hosts, command, true);	
+			long stopTime = System.currentTimeMillis();
+			System.out.println("TIME TO GREP: = " + (stopTime - startTime) + " milliseconds.");
 			
 			
 			//get filenames for server logs

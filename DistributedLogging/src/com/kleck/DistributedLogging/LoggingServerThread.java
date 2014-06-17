@@ -28,7 +28,6 @@ public class LoggingServerThread extends Thread {
 			String input = (String) clientToServer.readObject();
 			//System.out.println("server processing "+ input);
 			String output = "";
-			
 			//get output 
 			//could change this conditionally on input
 			if(input.equals("generateLogs")) {

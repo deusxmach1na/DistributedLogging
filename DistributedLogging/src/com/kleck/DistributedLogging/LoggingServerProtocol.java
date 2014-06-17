@@ -54,7 +54,7 @@ public class LoggingServerProtocol {
 		
 		filename = "machine." + serverNumber + ".log";
 		Random random = new Random();
-		int linesToGenerate = 100000;
+		int linesToGenerate = 1100000;
 		int j = 0;			
 		
 		//open file writer and generate random lines
@@ -94,6 +94,7 @@ public class LoggingServerProtocol {
 		}
 		return filename;
 	}
+	
 
 	
 	//used to generate a random line in the logs

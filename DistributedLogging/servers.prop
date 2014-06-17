@@ -1,6 +1,6 @@
 #split servers into hostname,portnumber
 #split multiple servers by a ;
 #example usage:
-#servers=localhost,6665;localhost,7775
+#servers=localhost,6665;127.0.0.1,7775
 
-servers=localhost,6665;localhost,6666
+servers=localhost,6665;localhost,6667;localhost,6669
