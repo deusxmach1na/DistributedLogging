@@ -121,11 +121,6 @@ public class LoggingServerThread extends Thread {
 		else if(input.contains("4")) {
 			linesToGenerate = 5500000;  //~500 MB
 		} 
-		else if(input.contains("5")) {
-			linesToGenerate = 11000000;  //~1000 MB
-		} 
-		
-		
 		int j = 0;			
 		
 		//open file writer and generate random lines
