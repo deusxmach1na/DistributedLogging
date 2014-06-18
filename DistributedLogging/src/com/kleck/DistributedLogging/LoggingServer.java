@@ -3,11 +3,14 @@ package com.kleck.DistributedLogging;
 import java.net.*;
 import java.io.*;
 
+/* this code runs on each server or port
+ * a server needs to be able to do 2 things
+ * 1.  listen for incoming requests
+ * 2.  spin up new server thread
+ * 
+ */
+
 public class LoggingServer {
-	//this code runs on each server or port
-	//a server needs to be able to do 2 things
-	//1.  listen for requests
-	//2.  spin up new server thread
 	private int portNumber;
 	private int serverNumber;
 	private ServerSocket serverSocket;
@@ -65,11 +68,12 @@ public class LoggingServer {
 		return this.serverNumber;
 	}
 	
-	//get set runFlag
+	//get runFlag
 	public boolean isRunFlag() {
 		return runFlag;
 	}
-
+	
+	//set run flag
 	public void setRunFlag(boolean runFlag) {
 		this.runFlag = runFlag;
 	}

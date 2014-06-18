@@ -5,22 +5,23 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.io.*;
 
+/*
+ *  needs to do 3 things
+ *  1.  accept input from client socket
+ *  2.  process input using LoggingServerProtocol
+ *  3.  output results to client socket
+ *  1 thread of the server
+ */
 public class LoggingServerThread extends Thread {
-	//initialize socket and in and out buffers
 	private Socket clientSocket = null;
 	private int serverNumber;
 	
 	public LoggingServerThread (Socket clientSocket, int serverNumber) {
-		//System.out.println("Server Thread Accepted Connection");
 		this.clientSocket = clientSocket;
 		this.serverNumber = serverNumber;
 	}
 	
-	//1 thread of the server
-	//needs to do 3 things
-	//1.  accept input from client socket
-	//2.  process input using LoggingServerProtocol
-	//3.  output results to client socket
+
 	public void run() {
 		try {
 			DataOutputStream serverToClient = new DataOutputStream(clientSocket.getOutputStream());
@@ -28,7 +29,7 @@ public class LoggingServerThread extends Thread {
 			//get client input and do something (either execute grep or generateLogs for unit test)
 			String input = (String) clientToServer.readObject();
 			String output = "";
-			//could change this conditionally on input
+			
 			if(input.contains("generateLogs")) {
 				output = "Generated these files:\n" + generateLogs(input);
 			}
@@ -40,18 +41,17 @@ public class LoggingServerThread extends Thread {
 			serverToClient.writeBytes(output);
 			serverToClient.flush();
 
-		    //System.out.println("closing client socket on server");
 			//close the client socket
 			this.clientSocket.close();
 
 		}
 		catch (IOException e) {
 			e.printStackTrace();
-			System.out.println("IOException");
+			System.out.println("I/O Exception writing to client.");
 		} 
 		catch (ClassNotFoundException e) {
 			e.printStackTrace();
-			System.out.println("ClassNotFoundException");
+			System.out.println("Class Not Found Exception");
 		} 
 	}
 	
@@ -69,7 +69,8 @@ public class LoggingServerThread extends Thread {
             BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream())); 
             
             String s = "";
-            // read the output from the command
+            // send the output from the command
+            // to the client
             while ((s = stdInput.readLine()) != null) {
                 serverToClient.writeBytes("Server #" + this.serverNumber + ":" + s + "\n");
             }
@@ -81,13 +82,13 @@ public class LoggingServerThread extends Thread {
         }
         catch (IOException e) {
             e.printStackTrace();
+			System.out.println("I/O Exception writing to client.");
         }
 		return results;
 	}
 	
 	
 	//generate random logs for unit testing
-	//TESTING
 	public String generateLogs(String input) {
 		//need to generate 1 log per machine
 		//with the following
@@ -164,13 +165,12 @@ public class LoggingServerThread extends Thread {
 
 	
 	//used to generate a random line in the logs
-	//TESTING
 	private String generateRandomLine() {
 		String alpha = "       0123456789AAAABBCCCDDDEEEEEEEFFFGGGHHHIJKLLLMMMNNNOOOOPPQRRRRRSSSSSTTTTTUUUVWXYZ";
 		Random random = new Random();
 		String value = "{" + String.valueOf(System.nanoTime()) + ":";
 		
-		//make the value 25 characters long
+		//make the value 50 characters long
 		for(int i=0;i<50;i++) {
 			value += alpha.charAt(random.nextInt(alpha.length()));
 		}

@@ -1,7 +1,6 @@
-#split servers into hostname,portnumber
-#split multiple servers by a ;
-#example usage:
+#example usage
 #servers=localhost,6665;127.0.0.1,7775
-#servers must be in order starting with server_id 0,...  in order to complete the unit test
+#servers must be given an integer serverId
+#with 0 and incrementing by 1 in order to complete the unit test
 
 servers=localhost,6665;localhost,6667;localhost,6669;

@@ -8,11 +8,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Properties;
 
+/*
+ * Will do 2 things
+ * 1.  Issue command to generate random logs to connected clients 
+ * 2.  Run grep pattern searches for rare, frequent, somewhat frequent patterns
+ * 
+ */
+
 public class LoggingUnitTests {
 	
 	public static void main(String[] args) {
 		//get hosts from file using LoggingClient loadParams()
-		//read from host file for easier testing :)
 		Properties props = LoggingClient.loadParams();
 		String[] hosts = props.getProperty("servers").split(";");
 		ArrayList<Integer> hostPorts = new ArrayList<Integer>();
@@ -73,7 +79,7 @@ public class LoggingUnitTests {
 				command = "grep \"" + knownKeys.get(0) + "\" ";
 				System.out.println("Searching for pattern: " + knownKeys.get(0));
 			}
-			//System.out.println(command);
+			
 			System.out.println("Please wait for the grep to complete...");
 			long startTime = System.currentTimeMillis();
 			LoggingClient.startClientThreads(hosts, command, true);	
@@ -90,7 +96,6 @@ public class LoggingUnitTests {
 			}
 			
 			//get filenames for server output to compare
-			//split hosts[i]
 			ArrayList<String> greppedFilenames = new ArrayList<String>();
 			for(int i=0;i<hosts.length;i++) {
 				greppedFilenames.add("serverResponse_" + hosts[i].split(",")[0] + "_" + hosts[i].split(",")[1] + ".out");
@@ -100,6 +105,7 @@ public class LoggingUnitTests {
 			System.out.println(parseFilesAndCompare(logFilenames, greppedFilenames, command, hosts));	
 		}
 		else {
+			//give user some hints on use
 			System.out.println("Example use:\n"
 					+ "java -cp DistributedLogging.jar com.kleck.DistributedLogging.LoggingUnitTests generateLogs X\n"
 			        + "X is an optional integer between 0 and 4\n"
@@ -135,21 +141,21 @@ public class LoggingUnitTests {
 		String result = "";
 		String tempCommand = command;
 		
+		//get the grepped results from each server and compare to local grep results
         for(int i=0;i<hosts.length;i++) {
             ArrayList<String> localGrepResults = new ArrayList<String>();
             ArrayList<String> remoteGrepResults = new ArrayList<String>();
             
 			//do a local grep on logFilenames and compare lineNumbers
         	command = tempCommand + logFilenames.get(i);
-        	//System.out.println(command);
 			try {
-				//do local grep
 				Process p = Runtime.getRuntime().exec(new String[] {"/bin/sh", "-c", command});
 		        BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream())); 
 		        String s = "";
+		        
 		        // read the output from the command
+	        	//get the line number for exact comparison
 		        while ((s = stdInput.readLine()) != null) {
-		        	//get the line number, guaranteed there are no other #LINE_NUMBER#'s
 		        	localGrepResults.add(s.split("#LINE_NUMBER#")[1]);
 		        }
 		        stdInput.close();
@@ -157,13 +163,12 @@ public class LoggingUnitTests {
 		        //get all the line numbers for the same server (the remote page)
 		        BufferedReader br = new BufferedReader(new FileReader(greppedFilenames.get(i)));
 		        String line;
-		        //System.out.println(greppedFilenames.get(i));
 		        while ((line = br.readLine()) != null) {
 		        	remoteGrepResults.add(line.split("#LINE_NUMBER#")[1]);
 		        }
 		        br.close();
-		        //System.out.println("grep size" + localGrepResults.size());
-		        //sort results
+		        
+		        //sort results for comparison
 		        Collections.sort(remoteGrepResults);
 		        Collections.sort(localGrepResults);
 		        
@@ -180,24 +185,24 @@ public class LoggingUnitTests {
 		        	isMatch = false;		
         			result = "FAIL**Results inconclusive.  Number of Results Do Not Match**FAIL";
 		        }
-		          
+		        
+		        //break immediately 
 		        if(!isMatch)
 		        	break;
 		        
 			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+				System.out.println("Exception thrown getting reply from server.");
+			} 
         
         }
+        
+        //if all files match then mission successful
 		if(isMatch)
 			result = "SUCCESS**Local and Remote Greps Match!**SUCCESS";
         return result;
-
-		
 	}
 }
+
 
 //inner class
 //called to start a new Logging server
